@@ -49,6 +49,7 @@ get_branches() {
         sort | \
         uniq | \
         grep -v '^$'
+}$'
 }
 
 # Function to show current status
@@ -80,19 +81,22 @@ select_branch() {
         exit 1
     fi
     
-    echo -e "${CYAN}🌿 Available Branches:${NC}"
+    echo -e "${CYAN}▶ Branch Selection${NC}"
+    echo "Available branches:"
+    echo
     for i in "${!branches[@]}"; do
         local marker=""
         if [ "${branches[$i]}" = "$current_branch" ]; then
-            marker=" ${GREEN}(current)${NC}"
+            marker=" ${GREEN}← current${NC}"
         fi
-        printf "   ${BLUE}%2d)${NC} %s%s\n" $((i+1)) "${branches[$i]}" "$marker"
+        printf "   ${BLUE}%2d)${NC} %-20s%s\n" $((i+1)) "${branches[$i]}" "$marker"
     done
     echo
     
     # Get user selection
     while true; do
-        read -p "Select branch by number (1-${#branches[@]}) or press Enter for current: " selection
+        echo -n "Select branch by number (1-${#branches[@]}) or press Enter for current: "
+        read selection
         
         # If empty, use current branch
         if [ -z "$selection" ]; then
@@ -209,7 +213,6 @@ main() {
     show_status
     
     # Select branch
-    print_step "Branch Selection"
     selected_branch=$(select_branch)
     
     # Show summary

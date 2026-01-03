@@ -1,105 +1,126 @@
 #!/bin/bash
 
 # Quick JIPTV Update Script
-# Usage: ./quick-update.sh [branch-number-or-name]
-
-set -e
+# Usage: ./quick-update.sh [branch_name_or_number]
 
 clear
+
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║                   ⚡ JIPTV Quick Update                      ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo
 
 # Colors
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
-YELLOW='\033[1;33m'
 RED='\033[0;31m'
 CYAN='\033[0;36m'
+YELLOW='\033[1;33m'
 NC='\033[0m'
 
-echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║                   ⚡ JIPTV Quick Update                       ║"
-echo "╚══════════════════════════════════════════════════════════════╝"
+# Current status
+current_branch=$(git branch --show-current)
+echo -e "${CYAN}📍 Current Status:${NC}"
+echo "   Repository: $(pwd)"
+echo "   Branch: ${current_branch}"
+echo "   Last commit: $(git log -1 --pretty=format:'%h - %s (%cr)' 2>/dev/null || echo 'No commits')"
 echo
 
-# Function to get available branches (clean)
-get_branches() {
-    git fetch origin --quiet 2>/dev/null || true
-    git branch -r | grep -v HEAD | sed 's/origin\///' | sed 's/^[[:space:]]*//' | sort | uniq
-}
+# Get available branches
+echo -e "${CYAN}🌿 Available Branches:${NC}"
+branches=($(git branch -r 2>/dev/null | grep -v HEAD | sed 's/origin\///' | sed 's/^[[:space:]]*//' | sort | uniq))
 
-# Function to show branches with numbers
-show_branches() {
-    local branches=("$@")
-    local current_branch=$(git branch --show-current)
-    
-    echo -e "${CYAN}🌿 Available branches:${NC}"
-    for i in "${!branches[@]}"; do
-        local marker=""
-        if [ "${branches[$i]}" = "$current_branch" ]; then
-            marker=" ${GREEN}(current)${NC}"
-        fi
-        printf "   ${BLUE}%2d)${NC} %s%s\n" $((i+1)) "${branches[$i]}" "$marker"
-    done
-}
-
-# Get available branches into array
-branches=()
-while IFS= read -r branch; do
-    if [ -n "$branch" ]; then
-        branches+=("$branch")
+for i in "${!branches[@]}"; do
+    marker=""
+    if [ "${branches[$i]}" = "$current_branch" ]; then
+        marker=" ${GREEN}← current${NC}"
     fi
-done < <(get_branches)
+    printf "   ${BLUE}%2d)${NC} %-20s%s\n" $((i+1)) "${branches[$i]}" "$marker"
+done
+echo
 
-if [ ${#branches[@]} -eq 0 ]; then
-    echo -e "${RED}❌ Error: No remote branches found!${NC}"
-    exit 1
-fi
-
-# Determine branch to use
+# Branch selection
 if [ -n "$1" ]; then
-    # Check if argument is a number
-    if [[ "$1" =~ ^[0-9]+$ ]] && [ "$1" -ge 1 ] && [ "$1" -le ${#branches[@]} ]; then
-        BRANCH="${branches[$((1-1))]}"
-        echo -e "${BLUE}ℹ${NC} Selected branch by number: ${BRANCH}"
+    # Parameter provided
+    if [[ "$1" =~ ^[0-9]+$ ]]; then
+        # It's a number
+        if [ "$1" -ge 1 ] && [ "$1" -le ${#branches[@]} ]; then
+            BRANCH="${branches[$((1-1))]}"
+            echo -e "${BLUE}ℹ${NC} Using branch #$1: $BRANCH"
+        else
+            echo -e "${RED}❌${NC} Invalid branch number: $1"
+            exit 1
+        fi
     else
-        # Treat as branch name
-        BRANCH=$1
-        echo -e "${BLUE}ℹ${NC} Selected branch by name: ${BRANCH}"
+        # It's a branch name
+        BRANCH="$1"
+        echo -e "${BLUE}ℹ${NC} Using specified branch: $BRANCH"
     fi
 else
-    # Show branches and ask for selection
-    show_branches "${branches[@]}"
-    echo
-    read -p "Select branch by number (1-${#branches[@]}) or press Enter for current: " selection
+    # Interactive selection
+    echo -n "Select branch by number (1-${#branches[@]}) or press Enter for current: "
+    read selection
     
     if [ -z "$selection" ]; then
-        BRANCH=$(git branch --show-current)
-        echo -e "${BLUE}ℹ${NC} Using current branch: ${BRANCH}"
+        BRANCH="$current_branch"
+        echo -e "${BLUE}ℹ${NC} Using current branch: $BRANCH"
     elif [[ "$selection" =~ ^[0-9]+$ ]] && [ "$selection" -ge 1 ] && [ "$selection" -le ${#branches[@]} ]; then
         BRANCH="${branches[$((selection-1))]}"
-        echo -e "${BLUE}ℹ${NC} Selected branch: ${BRANCH}"
+        echo -e "${BLUE}ℹ${NC} Selected branch: $BRANCH"
     else
-        echo -e "${RED}❌ Invalid selection!${NC}"
-        exit 1
+        echo -e "${RED}❌${NC} Invalid selection, using current branch"
+        BRANCH="$current_branch"
     fi
+fi
+
+echo
+echo -e "${YELLOW}⚠${NC} This will update to branch '$BRANCH' and rebuild the Docker image."
+read -p "Continue? (y/N): " confirm
+
+if [[ ! $confirm =~ ^[Yy]$ ]]; then
+    echo -e "${BLUE}ℹ${NC} Operation cancelled."
+    exit 0
 fi
 
 echo
 echo -e "${CYAN}▶${NC} [1/4] Fetching latest changes..."
-git fetch origin
+if git fetch origin --quiet; then
+    echo -e "${GREEN}✅${NC} Fetch completed"
+else
+    echo -e "${RED}❌${NC} Fetch failed"
+    exit 1
+fi
 
-echo -e "${CYAN}▶${NC} [2/4] Switching to branch: ${BRANCH}"
-git checkout $BRANCH
+echo -e "${CYAN}▶${NC} [2/4] Switching to branch: $BRANCH"
+if git checkout "$BRANCH" --quiet; then
+    echo -e "${GREEN}✅${NC} Branch switch completed"
+else
+    echo -e "${RED}❌${NC} Branch switch failed"
+    exit 1
+fi
 
 echo -e "${CYAN}▶${NC} [3/4] Pulling latest changes..."
-git pull origin $BRANCH
+if git pull origin "$BRANCH" --quiet; then
+    echo -e "${GREEN}✅${NC} Pull completed"
+else
+    echo -e "${RED}❌${NC} Pull failed"
+    exit 1
+fi
 
-echo -e "${CYAN}▶${NC} [4/4] Building Docker image..."
-docker build -t jiptv:latest .
+echo -e "${CYAN}▶${NC} [4/4] Building Docker image: jiptv:latest"
+if docker build -t jiptv:latest . --quiet; then
+    echo -e "${GREEN}✅${NC} Docker build completed"
+else
+    echo -e "${RED}❌${NC} Docker build failed"
+    exit 1
+fi
 
 echo
-echo -e "${GREEN}✅ Update completed successfully!${NC}"
+echo -e "${GREEN}🎉 Quick update completed successfully!${NC}"
 echo
 echo -e "${CYAN}🔄 Next Steps:${NC}"
 echo "   1. Go to Portainer: https://dock.mallepetrus.nl"
 echo "   2. Navigate to Stacks → jiptv-app"
-echo "   3. Click 'Restart' to use the new image"
+echo "   3. Click 'Restart' to deploy the new image"
+echo
+echo -e "${BLUE}💡 Tip:${NC} You can also run: ${CYAN}./quick-update.sh 1${NC} or ${CYAN}./quick-update.sh main${NC}"
