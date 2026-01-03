@@ -135,6 +135,13 @@ update_repository() {
         exit 1
     fi
     
+    # Reset any local changes first
+    print_info "Resetting local changes..."
+    if ! git reset --hard HEAD; then
+        print_error "Failed to reset local changes"
+        exit 1
+    fi
+    
     # Switch to branch if needed
     if [ "$current_branch" != "$branch" ]; then
         print_info "Switching to branch: $branch"
@@ -144,9 +151,9 @@ update_repository() {
         fi
     fi
     
-    # Pull latest changes
-    print_info "Pulling latest changes..."
-    if ! git pull origin $branch; then
+    # Force pull latest changes (reset to remote)
+    print_info "Pulling latest changes (forced update)..."
+    if ! git reset --hard origin/$branch; then
         print_error "Failed to pull changes"
         exit 1
     fi
@@ -221,6 +228,7 @@ main() {
     echo -e "${CYAN}📋 Summary:${NC}"
     echo "   Selected branch: ${selected_branch}"
     echo "   Action: Update code and build Docker image"
+    echo -e "   ${YELLOW}⚠ Warning: Any local changes will be discarded!${NC}"
     echo
     
     # Confirm action

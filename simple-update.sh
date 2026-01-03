@@ -54,6 +54,16 @@ case $choice in
 esac
 
 echo
+echo -e "${YELLOW}⚠${NC} This will update to branch '$BRANCH' and rebuild the Docker image."
+echo -e "${YELLOW}⚠${NC} Any local changes will be discarded!"
+read -p "Continue? (y/N): " confirm
+
+if [[ ! $confirm =~ ^[Yy]$ ]]; then
+    echo -e "${BLUE}ℹ${NC} Operation cancelled."
+    exit 0
+fi
+
+echo
 echo -e "${CYAN}▶${NC} [1/4] Fetching latest changes..."
 if git fetch origin; then
     echo -e "${GREEN}✅${NC} Fetch completed"
@@ -61,17 +71,18 @@ else
     echo -e "${RED}❌${NC} Fetch failed, continuing anyway..."
 fi
 
-echo -e "${CYAN}▶${NC} [2/4] Switching to branch: $BRANCH"
-if git checkout $BRANCH; then
-    echo -e "${GREEN}✅${NC} Branch switch completed"
+echo -e "${CYAN}▶${NC} [2/4] Resetting local changes and switching to branch: $BRANCH"
+# Reset any local changes and switch to branch
+if git reset --hard HEAD && git checkout $BRANCH; then
+    echo -e "${GREEN}✅${NC} Reset and branch switch completed"
 else
-    echo -e "${RED}❌${NC} Branch switch failed"
+    echo -e "${RED}❌${NC} Reset or branch switch failed"
     exit 1
 fi
 
 echo -e "${CYAN}▶${NC} [3/4] Pulling latest changes..."
-if git pull origin $BRANCH; then
-    echo -e "${GREEN}✅${NC} Pull completed"
+if git reset --hard origin/$BRANCH; then
+    echo -e "${GREEN}✅${NC} Pull completed (forced update)"
 else
     echo -e "${RED}❌${NC} Pull failed"
     exit 1
