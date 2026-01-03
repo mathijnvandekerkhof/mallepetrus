@@ -9,7 +9,7 @@ set -e
 REPO_URL="https://github.com/mathijnvandekerkhof/mallepetrus.git"
 VPS_HOST="mallepetrus.nl"
 VPS_USER="root"  # Update with your VPS username
-DEPLOY_DIR="/opt/docker/one"
+DEPLOY_DIR="/opt/docker/jiptv"
 IMAGE_NAME="jiptv"
 IMAGE_TAG="latest"
 
