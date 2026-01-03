@@ -83,6 +83,28 @@ Een complete IPTV streaming platform met WebOS TV ondersteuning, gebouwd met Spr
 ./deploy-vps.sh update
 ```
 
+#### Update Scripts (VPS)
+Voor snelle updates op de VPS zijn er verschillende scripts beschikbaar:
+
+```bash
+# Interactive update met branch selectie
+./update-and-build.sh
+
+# Snelle update met branch parameter
+./quick-update.sh 1          # Branch nummer
+./quick-update.sh main       # Branch naam
+
+# Eenvoudige fallback update
+./simple-update.sh
+```
+
+**Features van update scripts:**
+- ✅ Interactieve branch selectie met nummers
+- ✅ Automatische git pull en Docker build
+- ✅ Colored output en progress indicators
+- ✅ Error handling en validatie
+- ✅ Portainer restart instructies
+
 #### Methode 3: Portainer Stack
 1. Upload `portainer-stack.yml` naar Portainer
 2. Configureer environment variables
@@ -224,6 +246,9 @@ jiptv/
 ├── deploy.ps1          # Windows deployment script
 ├── deploy.sh           # Linux/macOS deployment script
 ├── deploy-vps.sh       # VPS deployment script
+├── update-and-build.sh # Interactive update & build script
+├── quick-update.sh     # Fast update script with branch selection
+├── simple-update.sh    # Simple fallback update script
 └── portainer-stack.yml # Portainer stack configuration
 ```
 
