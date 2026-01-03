@@ -1,0 +1,10 @@
+     ██╗██╗██████╗ ████████╗██╗   ██╗
+     ██║██║██╔══██╗╚══██╔══╝██║   ██║
+     ██║██║██████╔╝   ██║   ██║   ██║
+██   ██║██║██╔═══╝    ██║   ╚██╗ ██╔╝
+╚█████╔╝██║██║        ██║    ╚████╔╝ 
+ ╚════╝ ╚═╝╚═╝        ╚═╝     ╚═══╝  
+
+:: IPTV Streaming Platform ::        (v${application.version:1.0.0})
+:: Spring Boot ${spring-boot.version} :: Java ${java.version}
+:: Profile: ${spring.profiles.active:default} :: Port: ${server.port:8080}

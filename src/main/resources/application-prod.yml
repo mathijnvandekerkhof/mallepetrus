@@ -21,6 +21,7 @@ spring:
   
   jpa:
     show-sql: false
+    open-in-view: false
     properties:
       hibernate:
         jdbc:
@@ -46,10 +47,13 @@ logging:
     org.springframework.security: WARN
     org.springframework.web: WARN
     org.hibernate: WARN
+    org.flywaydb: WARN
+    com.zaxxer.hikari: WARN
+    org.apache.catalina: WARN
+    org.springframework.data.redis: ERROR
     root: WARN
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{HH:mm:ss} %highlight(%-5level) %cyan([%15.15thread]) %yellow(%-40.40logger{39}) : %msg%n"
   file:
     name: /app/logs/jiptv.log
     max-size: 100MB
