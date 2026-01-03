@@ -29,10 +29,22 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Function to show available branches
+# Function to get available branches
+get_branches() {
+    git branch -r | grep -v HEAD | sed 's/origin\///' | sed 's/^[[:space:]]*//' | sort
+}
+
+# Function to show available branches with numbers
 show_branches() {
+    local branches=("$@")
     print_info "Available branches:"
-    git branch -r | grep -v HEAD | sed 's/origin\///' | sort
+    for i in "${!branches[@]}"; do
+        local current_marker=""
+        if [ "${branches[$i]}" = "$(git branch --show-current)" ]; then
+            current_marker=" ${GREEN}(current)${NC}"
+        fi
+        printf "  ${BLUE}%2d)${NC} %s%s\n" $((i+1)) "${branches[$i]}" "$current_marker"
+    done
 }
 
 # Function to select branch
@@ -41,19 +53,41 @@ select_branch() {
     print_info "Current branch: $(git branch --show-current)"
     echo
     
-    # Show available branches
-    show_branches
+    # Get available branches into array
+    local branches=()
+    while IFS= read -r branch; do
+        branches+=("$branch")
+    done < <(get_branches)
+    
+    if [ ${#branches[@]} -eq 0 ]; then
+        print_error "No remote branches found!"
+        exit 1
+    fi
+    
+    # Show branches with numbers
+    show_branches "${branches[@]}"
     echo
     
-    # Ask user for branch selection
-    read -p "Enter branch name (or press Enter for current branch): " selected_branch
-    
-    if [ -z "$selected_branch" ]; then
-        selected_branch=$(git branch --show-current)
-        print_info "Using current branch: $selected_branch"
-    else
-        print_info "Selected branch: $selected_branch"
-    fi
+    # Ask user for selection
+    while true; do
+        read -p "Select branch by number (1-${#branches[@]}) or press Enter for current branch: " selection
+        
+        # If empty, use current branch
+        if [ -z "$selection" ]; then
+            selected_branch=$(git branch --show-current)
+            print_info "Using current branch: $selected_branch"
+            break
+        fi
+        
+        # Check if input is a valid number
+        if [[ "$selection" =~ ^[0-9]+$ ]] && [ "$selection" -ge 1 ] && [ "$selection" -le ${#branches[@]} ]; then
+            selected_branch="${branches[$((selection-1))]}"
+            print_info "Selected branch: $selected_branch"
+            break
+        else
+            print_error "Invalid selection. Please enter a number between 1 and ${#branches[@]}"
+        fi
+    done
     
     echo "$selected_branch"
 }
@@ -140,6 +174,7 @@ restart_application() {
 
 # Main script execution
 main() {
+    clear
     echo "=================================================="
     echo "🚀 JIPTV Update and Build Script"
     echo "=================================================="
