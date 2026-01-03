@@ -54,6 +54,8 @@ logging:
     org.springframework.data.redis.repository.support: ERROR
     org.springframework.data.redis.repository.config: ERROR
     org.springframework.data.repository.config: WARN
+    org.springframework.boot.web.servlet.context: WARN
+    org.springframework.security.web: WARN
     root: WARN
   pattern:
     console: "%d{HH:mm:ss} %highlight(%-5level) %cyan([%15.15thread]) %yellow(%-40.40logger{39}) : %msg%n"
