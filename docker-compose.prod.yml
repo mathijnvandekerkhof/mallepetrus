@@ -68,5 +68,5 @@ volumes:
 
 networks:
   default:
-    name: mallepetrus_default
+    name: mallepetrus_mallepetrus_default
     external: true
