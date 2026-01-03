@@ -51,6 +51,9 @@ logging:
     com.zaxxer.hikari: WARN
     org.apache.catalina: WARN
     org.springframework.data.redis: ERROR
+    org.springframework.data.redis.repository.support: ERROR
+    org.springframework.data.redis.repository.config: ERROR
+    org.springframework.data.repository.config: WARN
     root: WARN
   pattern:
     console: "%d{HH:mm:ss} %highlight(%-5level) %cyan([%15.15thread]) %yellow(%-40.40logger{39}) : %msg%n"

@@ -54,6 +54,9 @@ logging:
   level:
     nl.mallepetrus.jiptv: DEBUG
     org.springframework.security: DEBUG
+    org.springframework.data.redis.repository.support: ERROR
+    org.springframework.data.redis.repository.config: ERROR
+    org.springframework.data.repository.config: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
