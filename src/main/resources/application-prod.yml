@@ -1,0 +1,92 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:jiptv-postgres}:${DB_PORT:5432}/${DB_NAME:jiptv}
+    username: ${DB_USER:jiptv}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  data:
+    redis:
+      host: jiptv-redis
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+  
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+        batch_versioned_data: true
+
+server:
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    connection-timeout: 20000
+    max-connections: 8192
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,text/css
+
+logging:
+  level:
+    nl.mallepetrus.jiptv: INFO
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    org.hibernate: WARN
+    root: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: /app/logs/jiptv.log
+    max-size: 100MB
+    max-history: 30
+
+# Production-specific JIPTV configuration
+jiptv:
+  # Transcoding optimized for production
+  transcoding:
+    max-concurrent-jobs: 2
+    job-timeout-hours: 6
+    cleanup-days: 14
+  
+  # Stream caching optimized for production
+  stream:
+    metadata:
+      cache-ttl: 86400  # 24 hours
+    url-cache-ttl: 3600   # 1 hour
+    preferences-cache-ttl: 7200  # 2 hours
+
+# Actuator for production monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  health:
+    mail:
+      enabled: true
+    redis:
+      enabled: true
+    db:
+      enabled: true

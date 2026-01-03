@@ -1,0 +1,90 @@
+# Docker Compose for local development
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: jiptv-postgres-dev
+    environment:
+      POSTGRES_DB: jiptv
+      POSTGRES_USER: jiptv
+      POSTGRES_PASSWORD: jiptv_dev_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - jiptv-dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jiptv -d jiptv"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: jiptv-redis-dev
+    command: redis-server --requirepass jiptv_redis_password
+    ports:
+      - "6379:6379"
+    networks:
+      - jiptv-dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "jiptv_redis_password", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # JIPTV Application (for local testing)
+  jiptv-app:
+    build: .
+    container_name: jiptv-app-dev
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: jiptv
+      DB_USER: jiptv
+      DB_PASSWORD: jiptv_dev_password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: jiptv_redis_password
+      REDIS_DATABASE_GENERAL: 0
+      REDIS_DATABASE_ZEROTRUST: 1
+      REDIS_DATABASE_RATELIMIT: 2
+      JWT_SECRET: dev_jwt_secret_key_change_in_production
+      ZERO_TRUST_ENABLED: true
+      ZERO_TRUST_RISK_THRESHOLD: 75
+      ZERO_TRUST_MAX_DEVICES: 5
+      BREVO_SMTP_HOST: smtp-relay.brevo.com
+      BREVO_SMTP_PORT: 587
+      BREVO_SMTP_USER: your_brevo_user
+      BREVO_SMTP_PASSWORD: your_brevo_password
+      MAIL_FROM: noreply@mallepetrus.nl
+      ADMIN_DOMAIN: admin.mallepetrus.nl
+      USER_DOMAIN: users.mallepetrus.nl
+      API_DOMAIN: api.mallepetrus.nl
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - jiptv-dev
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  postgres_dev_data:
+    driver: local
+
+networks:
+  jiptv-dev:
+    driver: bridge

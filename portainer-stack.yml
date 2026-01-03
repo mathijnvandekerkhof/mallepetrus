@@ -1,0 +1,112 @@
+# Portainer Stack Configuration for JIPTV
+# This file can be used directly in Portainer to deploy the JIPTV application
+
+version: '3.8'
+
+services:
+  jiptv-app:
+    image: jiptv:latest
+    container_name: jiptv-app
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      
+      # Database Configuration
+      DB_HOST: jiptv-postgres
+      DB_PORT: 5432
+      DB_NAME: jiptv
+      DB_USER: jiptv
+      DB_PASSWORD: ${DB_PASSWORD}
+      
+      # Redis Configuration
+      REDIS_HOST: jiptv-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_DATABASE_GENERAL: ${REDIS_DATABASE_GENERAL}
+      REDIS_DATABASE_ZEROTRUST: ${REDIS_DATABASE_ZEROTRUST}
+      REDIS_DATABASE_RATELIMIT: ${REDIS_DATABASE_RATELIMIT}
+      
+      # Security Configuration
+      JWT_SECRET: ${JWT_SECRET}
+      ZERO_TRUST_ENABLED: ${ZERO_TRUST_ENABLED}
+      ZERO_TRUST_RISK_THRESHOLD: ${ZERO_TRUST_RISK_THRESHOLD}
+      ZERO_TRUST_MAX_DEVICES: ${ZERO_TRUST_MAX_DEVICES}
+      
+      # Email Configuration
+      BREVO_SMTP_HOST: ${BREVO_SMTP_HOST}
+      BREVO_SMTP_PORT: ${BREVO_SMTP_PORT}
+      BREVO_SMTP_USER: ${BREVO_SMTP_USER}
+      BREVO_SMTP_PASSWORD: ${BREVO_SMTP_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM}
+      
+      # Domain Configuration
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN}
+      USER_DOMAIN: ${USER_DOMAIN}
+      API_DOMAIN: ${API_DOMAIN}
+      
+      # FFmpeg Configuration
+      FFMPEG_PATH: ffmpeg
+      FFPROBE_PATH: ffprobe
+      FFMPEG_TIMEOUT: ${FFMPEG_TIMEOUT}
+      
+      # Transcoding Configuration
+      TRANSCODING_OUTPUT_DIR: /app/transcoded
+      TRANSCODING_MAX_CONCURRENT_JOBS: ${TRANSCODING_MAX_CONCURRENT_JOBS}
+      TRANSCODING_JOB_TIMEOUT_HOURS: ${TRANSCODING_JOB_TIMEOUT_HOURS}
+      TRANSCODING_CLEANUP_DAYS: ${TRANSCODING_CLEANUP_DAYS}
+      HLS_SEGMENT_DURATION: ${HLS_SEGMENT_DURATION}
+      
+    volumes:
+      # Persistent storage for transcoded files
+      - jiptv-transcoded:/app/transcoded
+      # Application logs
+      - jiptv-logs:/app/logs
+      # Optional: External media directory (uncomment and configure as needed)
+      # - ${MEDIA_PATH}:/media:ro
+      
+    networks:
+      - proxy_net
+      
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+      
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
+          
+    labels:
+      # Nginx Proxy Manager labels
+      - "nginx-proxy-manager.enable=true"
+      # Traefik labels (if using Traefik instead)
+      # - "traefik.enable=true"
+      # - "traefik.http.routers.jiptv.rule=Host(`${API_DOMAIN}`)"
+      # - "traefik.http.services.jiptv.loadbalancer.server.port=8080"
+
+volumes:
+  jiptv-transcoded:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/jiptv/transcoded
+      
+  jiptv-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/jiptv/logs
+
+networks:
+  proxy_net:
+    external: true

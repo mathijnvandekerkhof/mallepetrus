@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+DEPLOYMENT.md
+*.md
+
+# IDE
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local development
+.env
+.env.local
+docker-compose.yml
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Build artifacts (will be created in container)
+target/
+
+# Kiro configuration
+.kiro/
+
+# Logs
+*.log

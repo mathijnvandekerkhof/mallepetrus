@@ -1,0 +1,74 @@
+# Kiro IDE configuration and steering files
+.kiro/
+
+# Local development files - DO NOT COMMIT
+.env
+.env.local
+.env.*.local
+*.local
+local/
+temp/
+tmp/
+
+# IDE and editor files
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Spring Boot
+*.log
+*.gz
+*.tmp
+application-local.yml
+application-local.properties
+
+# Docker local overrides
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Personal notes and documentation
+notes/
+personal/
+scratch/
