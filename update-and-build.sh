@@ -36,8 +36,19 @@ print_step() {
 
 # Function to get available branches (clean)
 get_branches() {
-    git fetch origin --quiet 2>/dev/null || true
-    git branch -r | grep -v HEAD | sed 's/origin\///' | sed 's/^[[:space:]]*//' | sort | uniq
+    # First try to fetch quietly
+    git fetch origin --quiet 2>/dev/null || git fetch origin 2>/dev/null || true
+    
+    # Get remote branches, clean them up
+    git branch -r 2>/dev/null | \
+        grep -v HEAD | \
+        grep -v "origin/HEAD" | \
+        sed 's/origin\///' | \
+        sed 's/^[[:space:]]*//' | \
+        sed 's/[[:space:]]*$//' | \
+        sort | \
+        uniq | \
+        grep -v '^$'
 }
 
 # Function to show current status
