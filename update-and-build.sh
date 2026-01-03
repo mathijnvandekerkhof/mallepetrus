@@ -50,6 +50,7 @@ get_branches() {
         uniq | \
         grep -v '^$'
 }$'
+}$'
 }
 
 # Function to show current status
