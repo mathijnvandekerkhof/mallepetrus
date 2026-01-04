@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /
+
+# JIPTV Admin Dashboard - Private Application
+# No public indexing allowed
