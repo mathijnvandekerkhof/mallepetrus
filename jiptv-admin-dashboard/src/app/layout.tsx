@@ -3,7 +3,6 @@ import { Inter } from 'next/font/google'
 import { AntdRegistry } from '@ant-design/nextjs-registry'
 import { ConfigProvider } from 'antd'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -49,7 +48,6 @@ export default function RootLayout({
           <ConfigProvider theme={antdTheme}>
             <QueryClientProvider client={queryClient}>
               {children}
-              <ReactQueryDevtools initialIsOpen={false} />
             </QueryClientProvider>
           </ConfigProvider>
         </AntdRegistry>

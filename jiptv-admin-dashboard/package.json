@@ -32,7 +32,6 @@
     "eslint-config-next": "14.0.4",
     "tailwindcss": "^3.3.6",
     "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32",
-    "@tanstack/react-query-devtools": "^5.17.0"
+    "postcss": "^8.4.32"
   }
 }
