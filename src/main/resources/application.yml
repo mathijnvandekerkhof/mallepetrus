@@ -47,8 +47,8 @@ spring:
 
 server:
   port: 8080
-  servlet:
-    context-path: /api
+  # Remove context-path so admin dashboard can be served on root
+  # API endpoints will be handled by @RequestMapping("/api") annotations
 
 logging:
   level:

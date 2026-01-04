@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/cors-test")
+@RequestMapping("/api/cors-test")
 @CrossOrigin(origins = "*", allowCredentials = "false")
 public class CorsTestController {
 

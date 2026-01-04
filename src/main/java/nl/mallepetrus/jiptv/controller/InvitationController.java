@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/invitations")
+@RequestMapping("/api/invitations")
 public class InvitationController {
 
     @Autowired

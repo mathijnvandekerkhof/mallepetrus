@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/streams")
+@RequestMapping("/api/streams")
 public class StreamManagementController {
 
     private static final Logger logger = LoggerFactory.getLogger(StreamManagementController.class);

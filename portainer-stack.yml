@@ -1,4 +1,4 @@
-# Portainer Stack Configuration for JIPTV
+# Portainer Stack Configuration for JIPTV with Integrated Admin Dashboard
 # This file can be used directly in Portainer to deploy the JIPTV application
 
 version: '3.8'
@@ -85,11 +85,11 @@ services:
           cpus: '1.0'
           
     labels:
-      # Nginx Proxy Manager labels
+      # Nginx Proxy Manager labels for both admin dashboard and API
       - "nginx-proxy-manager.enable=true"
       # Traefik labels (if using Traefik instead)
       # - "traefik.enable=true"
-      # - "traefik.http.routers.jiptv.rule=Host(`${API_DOMAIN}`)"
+      # - "traefik.http.routers.jiptv.rule=Host(`${ADMIN_DOMAIN}`) || Host(`${API_DOMAIN}`)"
       # - "traefik.http.services.jiptv.loadbalancer.server.port=8080"
 
 volumes:

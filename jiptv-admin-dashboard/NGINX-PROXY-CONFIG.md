@@ -1,22 +1,75 @@
-# Nginx Proxy Manager Configuration for JIPTV Admin Dashboard
+# Nginx Proxy Manager Configuration for JIPTV
 
-## Required Headers for Next.js Behind Reverse Proxy
+## Exact Configuration Settings
 
-When deploying the JIPTV Admin Dashboard behind Nginx Proxy Manager, you need to configure proper headers to prevent Server Actions errors.
+### 1. API Backend (api.mallepetrus.nl)
 
-### Nginx Proxy Manager Configuration
+**Proxy Host Settings:**
+- Domain Names: `api.mallepetrus.nl`
+- Scheme: `http`
+- Forward Hostname/IP: `jiptv-app`
+- Forward Port: `8080`
+- Cache Assets: ✅ Enabled
+- Block Common Exploits: ✅ Enabled
+- Websockets Support: ✅ Enabled
 
-1. **Create Proxy Host**:
-   - Domain: `admin.mallepetrus.nl`
-   - Forward Hostname/IP: `jiptv-admin` (container name)
-   - Forward Port: `3000`
-   - Enable SSL with Let's Encrypt
+**SSL Tab:**
+- SSL Certificate: Request a new SSL Certificate
+- Force SSL: ✅ Enabled
+- HTTP/2 Support: ✅ Enabled
+- HSTS Enabled: ✅ Enabled
 
-2. **Advanced Tab - Custom Nginx Configuration**:
-   Add the following configuration to handle Next.js properly:
-
+**Advanced Tab - Custom Nginx Configuration:**
 ```nginx
-# Required headers for Next.js Server Actions
+# API Backend Configuration
+proxy_set_header Host $host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+proxy_set_header X-Forwarded-Host $host;
+
+# CORS headers for API
+add_header 'Access-Control-Allow-Origin' 'https://admin.mallepetrus.nl' always;
+add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type, Accept, Origin, X-Requested-With' always;
+add_header 'Access-Control-Allow-Credentials' 'true' always;
+
+# Handle preflight requests
+if ($request_method = 'OPTIONS') {
+    add_header 'Access-Control-Allow-Origin' 'https://admin.mallepetrus.nl' always;
+    add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+    add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type, Accept, Origin, X-Requested-With' always;
+    add_header 'Access-Control-Allow-Credentials' 'true' always;
+    add_header 'Content-Length' 0;
+    return 204;
+}
+
+# Timeouts for API
+proxy_connect_timeout 60s;
+proxy_send_timeout 60s;
+proxy_read_timeout 60s;
+```
+
+### 2. Admin Dashboard (admin.mallepetrus.nl)
+
+**Proxy Host Settings:**
+- Domain Names: `admin.mallepetrus.nl`
+- Scheme: `http`
+- Forward Hostname/IP: `jiptv-admin`
+- Forward Port: `3000`
+- Cache Assets: ✅ Enabled
+- Block Common Exploits: ✅ Enabled
+- Websockets Support: ✅ Enabled
+
+**SSL Tab:**
+- SSL Certificate: Request a new SSL Certificate
+- Force SSL: ✅ Enabled
+- HTTP/2 Support: ✅ Enabled
+- HSTS Enabled: ✅ Enabled
+
+**Advanced Tab - Custom Nginx Configuration:**
+```nginx
+# Next.js Admin Dashboard Configuration
 proxy_set_header Host $host;
 proxy_set_header X-Real-IP $remote_addr;
 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -24,95 +77,105 @@ proxy_set_header X-Forwarded-Proto $scheme;
 proxy_set_header X-Forwarded-Host $host;
 proxy_set_header X-Forwarded-Port $server_port;
 
-# Required for Next.js Server Actions
+# CRITICAL: Required for Next.js Server Actions
 proxy_set_header Origin $scheme://$host;
 proxy_set_header Referer $scheme://$host$request_uri;
 
-# WebSocket support (if needed)
+# WebSocket support for Next.js
 proxy_http_version 1.1;
 proxy_set_header Upgrade $http_upgrade;
 proxy_set_header Connection "upgrade";
+
+# Next.js specific headers
+proxy_set_header X-Forwarded-Prefix "";
+proxy_set_header X-NginX-Proxy true;
 
 # Timeouts
 proxy_connect_timeout 60s;
 proxy_send_timeout 60s;
 proxy_read_timeout 60s;
 
-# Buffer settings
+# Buffer settings for Next.js
 proxy_buffering on;
 proxy_buffer_size 128k;
 proxy_buffers 4 256k;
 proxy_busy_buffers_size 256k;
+
+# Disable proxy cache for dynamic content
+proxy_cache off;
 ```
 
-### Alternative: Simple Configuration
+## Troubleshooting Steps
 
-If the above doesn't work, try this minimal configuration:
+### If Admin Dashboard Shows "Internal Error"
 
-```nginx
-# Minimal headers for Next.js
-proxy_set_header Host $host;
-proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-proxy_set_header X-Forwarded-Proto $scheme;
-proxy_set_header Origin $scheme://$host;
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **"Missing origin header" errors**:
-   - Ensure `proxy_set_header Origin $scheme://$host;` is configured
-   - Check that SSL is properly configured
-
-2. **"Failed to find Server Action" errors**:
-   - This indicates a deployment mismatch
-   - Restart the `jiptv-admin` container after configuration changes
-   - Clear browser cache
-
-3. **Container not starting**:
-   - Check container logs: `docker logs jiptv-admin`
-   - Verify the image was built correctly
-   - Check port 3000 is not in use
-
-### Verification Steps
-
-1. **Check container status**:
+1. **Check container status:**
    ```bash
    docker ps | grep jiptv-admin
-   ```
-
-2. **Test direct container access**:
-   ```bash
-   curl http://localhost:3000/api/health
-   ```
-
-3. **Test through proxy**:
-   ```bash
-   curl https://admin.mallepetrus.nl/api/health
-   ```
-
-4. **Check container logs**:
-   ```bash
    docker logs jiptv-admin -f
    ```
 
-## Deployment Steps
+2. **Test direct container access:**
+   ```bash
+   docker exec -it jiptv-admin wget -qO- http://localhost:3000/api/health
+   ```
 
-1. **Build and deploy**:
+3. **Restart admin container:**
+   ```bash
+   docker restart jiptv-admin
+   ```
+
+### If API Returns 404 Errors
+
+1. **Check backend container:**
+   ```bash
+   docker ps | grep jiptv-app
+   docker logs jiptv-app -f
+   ```
+
+2. **Test backend directly:**
+   ```bash
+   docker exec -it jiptv-app wget -qO- http://localhost:8080/actuator/health
+   ```
+
+3. **Restart backend container:**
+   ```bash
+   docker restart jiptv-app
+   ```
+
+### Container Network Verification
+
+All containers should be in the `proxy_net` network:
+```bash
+docker network inspect proxy_net
+```
+
+Expected containers:
+- `jiptv-admin` (172.18.0.7)
+- `jiptv-app` (172.18.0.6)
+- `nginx_proxy_manager` (172.18.0.5)
+
+## Deployment Order
+
+1. **Update and rebuild admin dashboard:**
    ```bash
    ./update-admin.sh
    ```
 
-2. **Create Portainer stack** named `jiptv-admin`:
-   - Use the `portainer-stack.yml` configuration
-   - Set environment variables if needed
+2. **Update and rebuild backend:**
+   ```bash
+   ./update-backend.sh
+   ```
 
-3. **Configure Nginx Proxy Manager**:
-   - Add the custom configuration above
-   - Test SSL certificate
+3. **Restart stacks in Portainer:**
+   - Restart `jiptv-admin` stack
+   - Restart `jiptv-app` stack
 
-4. **Verify deployment**:
-   - Navigate to `https://admin.mallepetrus.nl`
-   - Check browser console for errors
-   - Verify setup wizard appears if no admin exists
+4. **Configure Nginx Proxy Manager:**
+   - Delete existing proxy hosts if they have issues
+   - Create new proxy hosts with the exact configuration above
+   - Test SSL certificates
+
+5. **Verify deployment:**
+   - Test: `https://api.mallepetrus.nl/actuator/health`
+   - Test: `https://admin.mallepetrus.nl`

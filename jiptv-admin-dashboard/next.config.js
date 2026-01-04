@@ -1,11 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-  experimental: {
-    serverComponentsExternalPackages: []
+  output: 'export',
+  trailingSlash: true,
+  images: {
+    unoptimized: true
   },
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://api.mallepetrus.nl',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || '/api',
     NEXT_PUBLIC_APP_NAME: 'JIPTV Admin Dashboard'
   },
   // Optimize build performance
@@ -15,11 +16,7 @@ const nextConfig = {
   },
   // Disable source maps in production for faster builds
   productionBrowserSourceMaps: false,
-  // Optimize images
-  images: {
-    unoptimized: true
-  },
-  // Configure for reverse proxy deployment
+  // Configure for static export
   async headers() {
     return [
       {
@@ -40,10 +37,6 @@ const nextConfig = {
         ],
       },
     ]
-  },
-  // Remove rewrites that were causing issues
-  async rewrites() {
-    return []
   }
 }
 

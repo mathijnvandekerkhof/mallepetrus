@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/mfa")
+@RequestMapping("/api/mfa")
 public class MfaController {
 
     @Autowired

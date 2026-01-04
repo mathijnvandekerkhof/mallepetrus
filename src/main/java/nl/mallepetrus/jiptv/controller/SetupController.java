@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/setup")
+@RequestMapping("/api/setup")
 @CrossOrigin(origins = {"https://admin.mallepetrus.nl", "http://localhost:3000"}, allowCredentials = "true")
 public class SetupController {
 

@@ -1,5 +1,25 @@
-# Multi-stage build for JIPTV Spring Boot application
-FROM eclipse-temurin:21-jdk-alpine AS builder
+# Multi-stage build for JIPTV Spring Boot application with integrated Admin Dashboard
+FROM node:18-alpine AS frontend-builder
+
+WORKDIR /app/frontend
+
+# Copy admin dashboard files
+COPY jiptv-admin-dashboard/package*.json ./
+RUN npm ci --only=production
+
+# Copy admin dashboard source
+COPY jiptv-admin-dashboard/ ./
+
+# Set production environment for integrated deployment
+ENV NODE_ENV=production
+ENV NEXT_PUBLIC_API_URL=/api
+ENV NEXT_PUBLIC_APP_NAME="JIPTV Admin Dashboard"
+
+# Build Next.js application and export static files
+RUN npm run build
+
+# Backend builder stage
+FROM eclipse-temurin:21-jdk-alpine AS backend-builder
 
 WORKDIR /app
 
@@ -30,12 +50,15 @@ RUN addgroup -g 1001 -S jiptv && \
 
 WORKDIR /app
 
-# Create directories for transcoding output
-RUN mkdir -p /app/transcoded/hls /app/transcoded/transcoded /app/logs && \
+# Create directories for transcoding output and static resources
+RUN mkdir -p /app/transcoded/hls /app/transcoded/transcoded /app/logs /app/static/admin && \
     chown -R jiptv:jiptv /app
 
-# Copy built jar from builder stage
-COPY --from=builder /app/target/*.jar app.jar
+# Copy built jar from backend builder stage
+COPY --from=backend-builder /app/target/*.jar app.jar
+
+# Copy built frontend from frontend builder stage to Spring Boot static resources
+COPY --from=frontend-builder /app/frontend/out /app/static/admin/
 
 # Change ownership to jiptv user
 RUN chown -R jiptv:jiptv /app

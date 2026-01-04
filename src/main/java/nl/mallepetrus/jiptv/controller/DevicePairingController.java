@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/device-pairing")
+@RequestMapping("/api/device-pairing")
 public class DevicePairingController {
 
     @Autowired
