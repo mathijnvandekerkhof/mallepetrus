@@ -18,19 +18,29 @@ public class CorsConfig {
         
         // Allow specific origins
         configuration.setAllowedOriginPatterns(Arrays.asList(
-            "http://localhost:3000",           // Local development
             "https://admin.mallepetrus.nl",    // Production admin dashboard
+            "http://localhost:3000",           // Local development
             "https://mallepetrus.nl",          // Production main domain
-            "http://localhost:*"               // Any localhost port for development
+            "http://localhost:*",              // Any localhost port for development
+            "*"                                // Temporary: allow all origins for debugging
         ));
         
         // Allow specific HTTP methods
         configuration.setAllowedMethods(Arrays.asList(
-            "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+            "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"
         ));
         
         // Allow specific headers
-        configuration.setAllowedHeaders(Arrays.asList(
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        
+        // Allow credentials (for cookies, authorization headers)
+        configuration.setAllowCredentials(true);
+        
+        // Cache preflight response for 1 hour
+        configuration.setMaxAge(3600L);
+        
+        // Expose headers that the client can access
+        configuration.setExposedHeaders(Arrays.asList(
             "Authorization",
             "Content-Type",
             "X-Requested-With",
@@ -39,12 +49,6 @@ public class CorsConfig {
             "Access-Control-Request-Method",
             "Access-Control-Request-Headers"
         ));
-        
-        // Allow credentials (for cookies, authorization headers)
-        configuration.setAllowCredentials(true);
-        
-        // Cache preflight response for 1 hour
-        configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

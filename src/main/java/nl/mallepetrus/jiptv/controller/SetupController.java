@@ -14,6 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/setup")
+@CrossOrigin(origins = {"https://admin.mallepetrus.nl", "http://localhost:3000"}, allowCredentials = "true")
 public class SetupController {
 
     private static final Logger logger = LoggerFactory.getLogger(SetupController.class);
