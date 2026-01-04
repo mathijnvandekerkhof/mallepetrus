@@ -119,8 +119,8 @@ export const API_ENDPOINTS = {
   
   // Setup
   SETUP: {
-    STATUS: '/api/setup/status',
-    INITIALIZE: '/api/setup/initialize',
+    STATUS: '/setup/status',
+    INITIALIZE: '/setup/initialize',
   },
 
   // User Management
@@ -159,6 +159,12 @@ export const API_ENDPOINTS = {
     SETUP: '/mfa/setup',
     ENABLE: '/mfa/enable',
     DISABLE: '/mfa/disable',
+  },
+
+  // CORS Test
+  CORS_TEST: {
+    PING: '/cors-test/ping',
+    ECHO: '/cors-test/echo',
   },
 
   // Health Check

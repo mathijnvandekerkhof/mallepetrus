@@ -10,7 +10,6 @@ const { Text } = Typography
 
 export default function HomePage() {
   const router = useRouter()
-  const [checking, setChecking] = useState(true)
   const [status, setStatus] = useState<string>('Checking system status...')
 
   useEffect(() => {
