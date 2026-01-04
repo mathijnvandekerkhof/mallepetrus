@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# JIPTV Update and Build Script
-# Usage: ./update-and-build.sh
+# JIPTV Admin Dashboard Update Script
+# Usage: ./update-admin.sh
 
 set -e  # Exit on any error
 
@@ -48,9 +48,7 @@ get_branches() {
         sed 's/[[:space:]]*$//' | \
         sort | \
         uniq | \
-        grep -v '^$'$'
-}$'
-}$'
+        grep -v '^$'
 }
 
 # Function to show current status
@@ -135,7 +133,7 @@ update_repository() {
         exit 1
     fi
     
-    # Reset any local changes first
+    # Discard any local changes first
     print_info "Discarding local changes..."
     if ! git reset --hard HEAD; then
         print_error "Failed to reset local changes"
@@ -166,7 +164,7 @@ update_repository() {
 
 # Function to build Docker image
 build_docker_image() {
-    print_step "Building Docker image: jiptv:latest"
+    print_step "Building Docker image: jiptv-admin:latest"
     
     # Check if Dockerfile exists
     if [ ! -f "Dockerfile" ]; then
@@ -176,13 +174,13 @@ build_docker_image() {
     
     # Build the image
     print_info "Starting Docker build process..."
-    if docker build -t jiptv:latest .; then
+    if docker build -t jiptv-admin:latest .; then
         print_success "Docker image built successfully!"
         
         # Show image info
         echo
         print_info "Image details:"
-        docker images jiptv:latest --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedAt}}" | head -2
+        docker images jiptv-admin:latest --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedAt}}" | head -2
     else
         print_error "Docker build failed!"
         exit 1
@@ -194,17 +192,17 @@ show_restart_instructions() {
     echo
     echo -e "${CYAN}🔄 Next Steps:${NC}"
     echo "   1. Go to Portainer: https://dock.mallepetrus.nl"
-    echo "   2. Navigate to Stacks → jiptv-app"
+    echo "   2. Navigate to Stacks → jiptv-admin"
     echo "   3. Click 'Restart' to use the new image"
     echo
-    print_warning "The new image will be used after restart!"
+    print_warning "The new admin dashboard image will be used after restart!"
 }
 
 # Main script execution
 main() {
     clear
     echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║                🚀 JIPTV Update & Build Script                ║"
+    echo "║              🎨 JIPTV Admin Dashboard Update                 ║"
     echo "╚══════════════════════════════════════════════════════════════╝"
     echo
     
@@ -217,6 +215,12 @@ main() {
     # Check if Docker is available
     if ! command -v docker &> /dev/null; then
         print_error "Docker is not installed or not in PATH!"
+        exit 1
+    fi
+    
+    # Check if we're in the admin dashboard directory
+    if [ ! -f "package.json" ]; then
+        print_error "Not in admin dashboard directory! Please run from jiptv-admin-dashboard/"
         exit 1
     fi
     
@@ -242,7 +246,7 @@ main() {
     fi
     
     echo
-    print_step "Starting update and build process..."
+    print_step "Starting admin dashboard update and build process..."
     echo
     
     # Update repository
@@ -255,7 +259,7 @@ main() {
     # Show restart instructions
     show_restart_instructions
     
-    print_success "Update and build completed successfully! 🎉"
+    print_success "Admin Dashboard update and build completed successfully! 🎉"
 }
 
 # Run main function

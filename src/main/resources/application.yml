@@ -54,9 +54,15 @@ logging:
   level:
     nl.mallepetrus.jiptv: DEBUG
     org.springframework.security: DEBUG
+    org.springframework.data.redis: ERROR
+    org.springframework.data.redis.repository: ERROR
     org.springframework.data.redis.repository.support: ERROR
     org.springframework.data.redis.repository.config: ERROR
-    org.springframework.data.repository.config: WARN
+    org.springframework.data.repository.config: ERROR
+    org.springframework.data.keyvalue.repository: ERROR
+    org.hibernate: ERROR
+    org.hibernate.SQL: ERROR
+    org.hibernate.type.descriptor.sql.BasicBinder: ERROR
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 

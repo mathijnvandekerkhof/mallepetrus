@@ -1,0 +1,23 @@
+# JIPTV Admin Dashboard - Local Development
+version: '3.8'
+
+services:
+  jiptv-admin:
+    build: .
+    container_name: jiptv-admin-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8080/api
+      - NEXT_PUBLIC_APP_NAME=JIPTV Admin Dashboard
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    restart: unless-stopped
+
+networks:
+  default:
+    name: jiptv-admin-dev

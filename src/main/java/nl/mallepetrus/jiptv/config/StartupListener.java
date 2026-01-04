@@ -37,17 +37,17 @@ public class StartupListener {
         log.info("╔══════════════════════════════════════════════════════════════╗");
         log.info("║                    🚀 JIPTV STARTED SUCCESSFULLY             ║");
         log.info("╠══════════════════════════════════════════════════════════════╣");
-        log.info("║ Started at: {}                              ║", timestamp);
-        log.info("║ Profile:    {}                                        ║", profile);
-        log.info("║ Port:       {}                                           ║", serverPort);
-        log.info("║ Context:    {}                                         ║", contextPath);
+        log.info("║ Started at: {:<47} ║", timestamp);
+        log.info("║ Profile:    {:<47} ║", profile);
+        log.info("║ Port:       {:<47} ║", serverPort);
+        log.info("║ Context:    {:<47} ║", contextPath);
         log.info("╠══════════════════════════════════════════════════════════════╣");
         log.info("║ 🔐 Authentication:     JWT + MFA                            ║");
         log.info("║ 🛡️  Zero Trust:        Enabled                              ║");
         log.info("║ 📱 Device Pairing:     WebOS TV Support                    ║");
         log.info("║ 🎬 Stream Management:  FFmpeg + Transcoding                ║");
-        log.info("║ 📊 Health Check:       localhost:{}{}/actuator/health      ║", 
-                serverPort, contextPath);
+        log.info("║ 📊 Health Check:       localhost:{}{}/actuator/health{} ║", 
+                serverPort, contextPath, " ".repeat(Math.max(0, 15 - serverPort.length() - contextPath.length())));
         log.info("╚══════════════════════════════════════════════════════════════╝");
         
         // Log important endpoints
