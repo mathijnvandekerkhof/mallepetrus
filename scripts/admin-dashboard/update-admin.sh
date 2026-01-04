@@ -219,9 +219,16 @@ main() {
     fi
     
     # Check if we're in the admin dashboard directory
-    if [ ! -f "package.json" ]; then
-        print_error "Not in admin dashboard directory! Please run from jiptv-admin-dashboard/"
+    if [ ! -f "../jiptv-admin-dashboard/package.json" ] && [ ! -f "jiptv-admin-dashboard/package.json" ] && [ ! -f "package.json" ]; then
+        print_error "Admin dashboard not found! Please run from project root or admin dashboard directory"
         exit 1
+    fi
+    
+    # Navigate to admin dashboard if needed
+    if [ -f "../jiptv-admin-dashboard/package.json" ]; then
+        cd ../jiptv-admin-dashboard
+    elif [ -f "jiptv-admin-dashboard/package.json" ]; then
+        cd jiptv-admin-dashboard
     fi
     
     # Show current status

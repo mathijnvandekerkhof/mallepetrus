@@ -30,11 +30,18 @@ cd jiptv-admin-dashboard
 ### 2. Build Admin Dashboard on VPS
 
 ```bash
+# Make scripts executable (first time only)
+./scripts/make-executable.sh
+
 # Option A: Interactive update with branch selection
 ./update-admin.sh
 
 # Option B: Quick update to main branch
-./quick-admin-update.sh main
+./quick-update-admin.sh main
+
+# Or use the scripts directly:
+./scripts/admin-dashboard/update-admin.sh
+./scripts/admin-dashboard/quick-admin-update.sh main
 ```
 
 The script will:
@@ -95,11 +102,14 @@ For future updates:
 # SSH to VPS
 ssh mathijsvdk@your-vps-ip
 
-# Navigate to admin dashboard
-cd /opt/docker/mallepetrus/jiptv-admin-dashboard
+# Navigate to project root
+cd /opt/docker/mallepetrus
 
-# Quick update
-./quick-admin-update.sh main
+# Quick update admin dashboard
+./quick-update-admin.sh main
+
+# Or interactive update
+./update-admin.sh
 
 # Then restart in Portainer:
 # Stacks → jiptv-admin → Restart
