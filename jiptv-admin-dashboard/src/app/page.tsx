@@ -23,24 +23,56 @@ export default function HomePage() {
       console.log('🔍 Checking setup status...')
       console.log('🌐 API Base URL:', process.env.NEXT_PUBLIC_API_URL)
       
-      // Check if setup is needed
-      const setupStatus = await apiClient.get<SetupStatus>(API_ENDPOINTS.SETUP.STATUS)
-      console.log('📊 Setup status:', setupStatus)
+      // Try HTTPS first, fallback to HTTP if SSL fails
+      let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.mallepetrus.nl'
       
-      if (setupStatus.needsSetup) {
-        setStatus('Setup required. Redirecting to setup wizard...')
-        console.log('🚀 Setup needed, redirecting to /setup')
-        // Setup needed, redirect to setup wizard
-        setTimeout(() => {
-          router.push('/setup')
-        }, 1500)
-      } else {
-        setStatus('System configured. Redirecting to login...')
-        console.log('✅ Setup complete, redirecting to /login')
-        // Setup complete, redirect to login
-        setTimeout(() => {
-          router.push('/login')
-        }, 1500)
+      try {
+        const setupStatus = await apiClient.get<SetupStatus>(API_ENDPOINTS.SETUP.STATUS)
+        console.log('📊 Setup status:', setupStatus)
+        
+        if (setupStatus.needsSetup) {
+          setStatus('Setup required. Redirecting to setup wizard...')
+          console.log('🚀 Setup needed, redirecting to /setup')
+          setTimeout(() => {
+            router.push('/setup')
+          }, 1500)
+        } else {
+          setStatus('System configured. Redirecting to login...')
+          console.log('✅ Setup complete, redirecting to /login')
+          setTimeout(() => {
+            router.push('/login')
+          }, 1500)
+        }
+      } catch (sslError: any) {
+        console.warn('🔒 HTTPS failed, trying HTTP fallback:', sslError.message)
+        
+        if (sslError.message?.includes('SSL') || sslError.message?.includes('certificate')) {
+          // Try HTTP fallback
+          setStatus('SSL issue detected, trying HTTP fallback...')
+          
+          const httpUrl = apiUrl.replace('https://', 'http://')
+          console.log('🔄 Trying HTTP fallback:', httpUrl)
+          
+          // Create temporary HTTP client
+          const httpResponse = await fetch(`${httpUrl}/api/setup/status`)
+          const setupStatus = await httpResponse.json()
+          
+          console.log('📊 Setup status (HTTP):', setupStatus)
+          
+          if (setupStatus.needsSetup) {
+            setStatus('Setup required. Redirecting to setup wizard...')
+            setTimeout(() => {
+              router.push('/setup')
+            }, 1500)
+          } else {
+            setStatus('System configured. Redirecting to login...')
+            setTimeout(() => {
+              router.push('/login')
+            }, 1500)
+          }
+        } else {
+          throw sslError
+        }
       }
     } catch (error: any) {
       console.error('❌ Setup check failed:', error)
