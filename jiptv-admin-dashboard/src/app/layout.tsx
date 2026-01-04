@@ -1,4 +1,5 @@
-import type { Metadata } from 'next'
+'use client'
+
 import { Inter } from 'next/font/google'
 import { AntdRegistry } from '@ant-design/nextjs-registry'
 import { ConfigProvider } from 'antd'
@@ -6,21 +7,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: 'JIPTV Admin Dashboard',
-  description: 'IPTV streaming service administration panel',
-}
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-})
 
 const antdTheme = {
   token: {
@@ -41,6 +27,17 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // Create QueryClient inside the component to avoid SSR issues
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: 1,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+      },
+    },
+  })
+
   return (
     <html lang="en">
       <body className={inter.className}>
