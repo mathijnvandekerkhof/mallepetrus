@@ -1,0 +1,21 @@
+# Simple JIPTV Admin Dashboard - Portainer Stack
+version: '3.8'
+
+services:
+  jiptv-admin-simple:
+    image: jiptv-admin-simple:latest
+    container_name: jiptv-admin-simple
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - proxy_net
+    labels:
+      - "npm.enable=true"
+      - "npm.host=admin.mallepetrus.nl"
+      - "npm.port=80"
+      - "npm.proto=http"
+
+networks:
+  proxy_net:
+    external: true

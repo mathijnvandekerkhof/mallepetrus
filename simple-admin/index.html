@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JIPTV Admin Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn { background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn:hover { background: #2563eb; }
+        .status { padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .status.online { background: #dcfce7; color: #166534; }
+        .status.offline { background: #fef2f2; color: #dc2626; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; width: 100%; margin: 5px 0; }
+        .error { color: #dc2626; background: #fef2f2; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .success { color: #166534; background: #dcfce7; padding: 10px; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 JIPTV Admin Dashboard</h1>
+            <p>Simple HTML admin interface</p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>🔐 Authentication</h2>
+                <div id="auth-section">
+                    <input type="email" id="email" placeholder="Email" value="admin@jiptv.local">
+                    <input type="password" id="password" placeholder="Password" value="admin123">
+                    <button class="btn" onclick="login()">Login</button>
+                </div>
+                <div id="auth-status"></div>
+            </div>
+
+            <div class="card">
+                <h2>📊 System Status</h2>
+                <div id="system-status">
+                    <p>Backend API: <span class="status offline" id="api-status">Checking...</span></p>
+                    <p>Database: <span class="status offline" id="db-status">Unknown</span></p>
+                    <p>Redis: <span class="status offline" id="redis-status">Unknown</span></p>
+                    <button class="btn" onclick="checkHealth()">Refresh Status</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>👥 User Management</h2>
+                <div id="user-section">
+                    <input type="email" id="invite-email" placeholder="Email to invite">
+                    <button class="btn" onclick="inviteUser()">Send Invitation</button>
+                    <div id="user-status"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📱 Device Management</h2>
+                <div id="device-section">
+                    <button class="btn" onclick="generateQR()">Generate QR Code</button>
+                    <button class="btn" onclick="listDevices()">List Devices</button>
+                    <div id="device-status"></div>
+                    <div id="qr-code"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://api.mallepetrus.nl';
+        let authToken = localStorage.getItem('jiptv_token');
+
+        // API helper
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const headers = { 'Content-Type': 'application/json' };
+            if (authToken) headers.Authorization = `Bearer ${authToken}`;
+            
+            const config = { method, headers };
+            if (data) config.body = JSON.stringify(data);
+            
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, config);
+                const result = await response.json();
+                
+                if (!response.ok) throw new Error(result.message || 'API Error');
+                return result;
+            } catch (error) {
+                throw new Error(`${method} ${endpoint}: ${error.message}`);
+            }
+        }
+
+        // Authentication
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const statusEl = document.getElementById('auth-status');
+            
+            try {
+                const result = await apiCall('/auth/login', 'POST', { email, password });
+                
+                if (result.requiresMfa) {
+                    const mfaCode = prompt('Enter MFA code:');
+                    if (mfaCode) {
+                        const mfaResult = await apiCall('/auth/login', 'POST', { email, password, mfaCode });
+                        authToken = mfaResult.accessToken;
+                    }
+                } else {
+                    authToken = result.accessToken;
+                }
+                
+                localStorage.setItem('jiptv_token', authToken);
+                statusEl.innerHTML = '<div class="success">✅ Logged in successfully!</div>';
+                checkHealth();
+            } catch (error) {
+                statusEl.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            }
+        }
+
+        // Health check
+        async function checkHealth() {
+            const apiEl = document.getElementById('api-status');
+            
+            try {
+                await apiCall('/actuator/health');
+                apiEl.textContent = 'Online';
+                apiEl.className = 'status online';
+            } catch (error) {
+                apiEl.textContent = 'Offline';
+                apiEl.className = 'status offline';
+            }
+        }
+
+        // User management
+        async function inviteUser() {
+            const email = document.getElementById('invite-email').value;
+            const statusEl = document.getElementById('user-status');
+            
+            if (!email) {
+                statusEl.innerHTML = '<div class="error">Please enter an email</div>';
+                return;
+            }
+            
+            try {
+                await apiCall('/invitations/invite', 'POST', { email });
+                statusEl.innerHTML = '<div class="success">✅ Invitation sent!</div>';
+                document.getElementById('invite-email').value = '';
+            } catch (error) {
+                statusEl.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            }
+        }
+
+        // Device management
+        async function generateQR() {
+            const statusEl = document.getElementById('device-status');
+            const qrEl = document.getElementById('qr-code');
+            
+            try {
+                const result = await apiCall('/device-pairing/generate-qr', 'POST');
+                statusEl.innerHTML = '<div class="success">✅ QR Code generated!</div>';
+                qrEl.innerHTML = `<img src="data:image/png;base64,${result.qrCodeImage}" alt="QR Code" style="max-width: 200px;">`;
+            } catch (error) {
+                statusEl.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            }
+        }
+
+        async function listDevices() {
+            const statusEl = document.getElementById('device-status');
+            
+            try {
+                const devices = await apiCall('/device-pairing/devices');
+                let html = '<h3>Paired Devices:</h3>';
+                devices.forEach(device => {
+                    const status = device.isActive ? 'online' : 'offline';
+                    html += `<p>${device.deviceName} <span class="status ${status}">${device.isActive ? 'Active' : 'Inactive'}</span></p>`;
+                });
+                statusEl.innerHTML = html;
+            } catch (error) {
+                statusEl.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            }
+        }
+
+        // Initialize
+        checkHealth();
+        if (authToken) {
+            document.getElementById('auth-status').innerHTML = '<div class="success">✅ Already logged in</div>';
+        }
+    </script>
+</body>
+</html>
