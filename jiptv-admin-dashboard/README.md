@@ -62,58 +62,29 @@ docker-compose up --build
 # Access at http://localhost:3000
 ```
 
-## VPS Deployment (Recommended)
+## 🚀 Quick Deployment
 
-### Prerequisites
-- JIPTV Backend running and accessible
-- Git repository cloned on VPS
-- Docker installed on VPS
-- Portainer running
-
-### Step-by-Step VPS Deployment
-
-1. **SSH to your VPS and navigate to the project**:
-   ```bash
-   ssh user@your-vps
-   cd /opt/docker/mallepetrus/jiptv-admin-dashboard
-   ```
-
-2. **Update and build using the update script**:
-   ```bash
-   # Interactive update with branch selection
-   ./update-admin.sh
-   
-   # Or quick update to main branch
-   ./quick-admin-update.sh main
-   ```
-
-3. **Deploy via Portainer**:
-   - Go to https://dock.mallepetrus.nl
-   - Create new stack: `jiptv-admin`
-   - Copy content from `portainer-stack.yml`
-   - Set environment variables:
-     ```
-     NEXT_PUBLIC_API_URL=https://api.mallepetrus.nl
-     ```
-   - Deploy the stack
-
-4. **Configure Nginx Proxy Manager**:
-   - Add new proxy host
-   - Domain: `admin.mallepetrus.nl`
-   - Forward to: `jiptv-admin:3000`
-   - Enable SSL with Let's Encrypt
-
-### Update Workflow
+### First Time Setup (VPS)
 ```bash
-# On VPS - Interactive update
-./update-admin.sh
-
-# On VPS - Quick update to specific branch
-./quick-admin-update.sh main
-
-# Then restart in Portainer
-# Stacks → jiptv-admin → Restart
+ssh user@your-vps
+cd /opt/docker/mallepetrus
+git pull origin main
+./setup-scripts.sh
 ```
+
+### Update Backend
+```bash
+./update-backend.sh
+# Then restart 'jiptv-app' in Portainer
+```
+
+### Update Admin Dashboard
+```bash
+./update-admin.sh
+# Then restart 'jiptv-admin' in Portainer
+```
+
+That's it! Just 2 simple commands.
 
 ### Environment Variables
 

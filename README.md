@@ -1,23 +1,50 @@
-# JIPTV - IPTV Streaming Platform
+# 🎬 JIPTV - IPTV Streaming Service
 
-Een complete IPTV streaming platform met WebOS TV ondersteuning, gebouwd met Spring Boot en FFmpeg transcoding.
+Modern IPTV streaming platform with WebOS TV support.
 
-## 🚀 Features
+## 🚀 Quick Start
 
-### ✅ Geïmplementeerd
-- **Setup Wizard** - Automatische admin account aanmaak
-- **Authentication System** - JWT-based met refresh tokens
-- **Multi-Factor Authentication** - TOTP-based (Google Authenticator compatible)
-- **Zero Trust Architecture** - Risk assessment en device management
-- **User Management** - Email uitnodigingen via Brevo SMTP
-- **WebOS TV Device Pairing** - QR code-based device koppeling
-- **IPTV Streaming Proxy** - Complete FFmpeg stream analysis
-- **Stream Transcoding & HLS Generation** - WebOS TV compatibility transcoding
-- **WebOS TV Streaming API** - HLS en transcoded video delivery
+### VPS Deployment
+```bash
+# SSH to VPS
+ssh user@your-vps
+cd /opt/docker/mallepetrus
 
-### 🔄 In Development
-- WebOS TV App
-- Admin Dashboard
+# First time setup
+git pull origin main
+./setup-scripts.sh
+
+# Update backend
+./update-backend.sh
+
+# Update admin dashboard  
+./update-admin.sh
+```
+
+### Local Development
+```bash
+# Backend
+./mvnw spring-boot:run
+
+# Admin Dashboard
+cd jiptv-admin-dashboard
+npm run dev
+```
+
+## 📦 What's Included
+
+- **Backend API**: Spring Boot with JWT + MFA
+- **Admin Dashboard**: Next.js with Ant Design
+- **Database**: PostgreSQL + Redis
+- **Deployment**: Docker + Portainer
+
+## 🌐 URLs
+
+- **API**: https://api.mallepetrus.nl
+- **Admin**: https://admin.mallepetrus.nl
+- **Portainer**: https://dock.mallepetrus.nl
+
+That's it! Simple and clean.
 - Advanced Analytics
 
 ## 🛠 Tech Stack
