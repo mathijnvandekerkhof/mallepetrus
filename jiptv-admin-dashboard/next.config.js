@@ -5,14 +5,15 @@ const nextConfig = {
     serverComponentsExternalPackages: []
   },
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://api.mallepetrus.nl',
     NEXT_PUBLIC_APP_NAME: 'JIPTV Admin Dashboard'
   },
   async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.mallepetrus.nl'
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`
+        destination: `${apiUrl}/:path*`
       }
     ]
   }

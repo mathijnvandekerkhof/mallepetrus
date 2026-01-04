@@ -17,6 +17,6 @@ git fetch origin
 git reset --hard origin/$BRANCH
 echo "▶ Building Docker image..."
 cd jiptv-admin-dashboard
-docker build -t jiptv-admin:latest .
+NEXT_PUBLIC_API_URL=https://api.mallepetrus.nl docker build -t jiptv-admin:latest .
 echo
 echo "✅ Done! Restart 'jiptv-admin' stack in Portainer."
